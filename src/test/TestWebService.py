@@ -45,6 +45,50 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
                 print(json)
                 self.assertTrue(response['data'] in json['data'])
 
+    async def test_join_room(self):
+        async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws1:
+            await ws1.send_json({
+                'command': 'create_room'
+            })
+
+            response = await ws1.receive_json()
+
+            async with self.client_session.ws_connect(host + "api/ws?nickname=234") as ws2:
+                await ws2.send_json({
+                    'command': 'join_room',
+                    'data': {
+                        'id': response['data']
+                    }
+                })
+
+                response1 = await ws1.receive_json()
+                response2 = await ws2.receive_json()
+                self.assertTrue('234' in response1['data']['name'])
+
+    async def test_leave_room(self):
+        async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws1:
+            await ws1.send_json({
+                'command': 'create_room'
+            })
+
+            response = await ws1.receive_json()
+
+            async with self.client_session.ws_connect(host + "api/ws?nickname=234") as ws2:
+                await ws2.send_json({
+                    'command': 'join_room',
+                    'data': {
+                        'id': response['data']
+                    }
+                })
+
+                await ws2.send_json({
+                    'command': 'leave_room',
+                })
+
+                response1 = await ws1.receive_json()
+                response2 = await ws2.receive_json()
+                self.assertTrue('234' in response1['data']['name'])
+
 
 if __name__ == '__main__':
     unittest.main()

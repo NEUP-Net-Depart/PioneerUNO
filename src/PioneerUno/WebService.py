@@ -3,9 +3,9 @@ import json
 import aiohttp
 from aiohttp import web
 
+from src.PioneerUno.Message import respond_success, unknown_command, missing_parameters_error, unknown_room_id
 from src.PioneerUno.Player import Player
-from src.PioneerUno.Response import respond_success, unknown_command, missing_parameters_error
-from src.PioneerUno.Room import get_all_room, add_room
+from src.PioneerUno.Room import get_all_room, add_room, rooms
 
 app = web.Application()
 routes = web.RouteTableDef()
@@ -21,18 +21,38 @@ async def get_rooms(request):
     return web.json_response(respond_success(get_all_room()))
 
 
-def handle_create_room(player):
+async def handle_create_room(player, data):
     new_room = add_room()
-    new_room.add_player(player)
+    await new_room.add_player(player)
     return respond_success(new_room.id)
 
 
-def handle_ping(player):
+async def handle_ping(player, data):
     return respond_success('pong')
+
+
+async def handle_join_room(player, data):
+    try:
+        room = rooms[data['id']]
+    except KeyError:
+        return unknown_room_id
+
+    await room.add_player(player)
+    return respond_success([
+        player.get_name()
+        for player in room.players.values()
+    ])
+
+
+async def handle_leave_room(player, data):
+    await player.leave_room()
+    return respond_success()
 
 
 command_handler = {
     "create_room": handle_create_room,
+    "join_room": handle_join_room,
+    "leave_room": handle_leave_room,
     "ping": handle_ping,
 }
 
@@ -52,8 +72,10 @@ async def websocket_handler(request):
     async for msg in ws:
         if msg.type == aiohttp.WSMsgType.TEXT:
             msg_json = json.loads(msg.data)
+            data = msg_json.get('data', None)
             try:
-                await ws.send_json(command_handler[msg_json['command']](player))
+                result = await command_handler[msg_json['command']](player, data)
+                await ws.send_json(result)
             except:
                 await ws.send_json(unknown_command)
                 raise
@@ -61,7 +83,7 @@ async def websocket_handler(request):
             print(ws.exception())
             break
 
-    player.leave_room()
+    await player.leave_room()
     print("disconnected")
 
 

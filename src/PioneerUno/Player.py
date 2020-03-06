@@ -8,7 +8,13 @@ class Player:
         self.nickname = nickname
         self.room = None
 
-    def leave_room(self):
+    def get_name(self):
+        return f'{self.nickname}@{self.id[:4]}'
+
+    async def leave_room(self):
         if self.room is not None:
-            self.room.remove_player(self)
+            await self.room.remove_player(self)
             self.room = None
+
+    async def send_message(self, message):
+        await self.conn.send_json(message.json())
