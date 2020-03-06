@@ -5,3 +5,6 @@ name = "tuna"
 
 [packages]
 aiohttp = "*"
+
+[requires]
+python_version = "3.8"
