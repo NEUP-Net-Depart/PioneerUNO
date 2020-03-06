@@ -3,9 +3,10 @@ import json
 import aiohttp
 from aiohttp import web
 
-from src.PioneerUno.Message import respond_success, unknown_command, missing_parameters_error, unknown_room_id
-from src.PioneerUno.Player import Player
-from src.PioneerUno.Room import get_all_room, add_room, rooms
+from src.lobby.Message import respond_success, unknown_command, missing_parameters_error, unknown_room_id, \
+    room_is_full
+from src.lobby.Player import Player
+from src.lobby.Room import get_all_room, add_room, rooms
 
 app = web.Application()
 routes = web.RouteTableDef()
@@ -37,7 +38,10 @@ async def handle_join_room(player, data):
     except KeyError:
         return unknown_room_id
 
-    await room.add_player(player)
+    try:
+        await room.add_player(player)
+    except:
+        return room_is_full
     return respond_success([
         player.get_name()
         for player in room.players.values()
@@ -47,6 +51,10 @@ async def handle_join_room(player, data):
 async def handle_leave_room(player, data):
     await player.leave_room()
     return respond_success()
+
+
+async def handle_prepare(player, data):
+    pass
 
 
 command_handler = {

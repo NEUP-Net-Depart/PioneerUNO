@@ -7,6 +7,7 @@ class Player:
         self.conn = conn
         self.nickname = nickname
         self.room = None
+        self.isPrepared = False
 
     def get_name(self):
         return f'{self.nickname}@{self.id[:4]}'
@@ -18,3 +19,8 @@ class Player:
 
     async def send_message(self, message):
         await self.conn.send_json(message.json())
+
+    async def toggle_prepare(self, state: bool):
+        self.isPrepared = state
+        if self.room is not None:
+            await self.room.on_prepare(self, state)

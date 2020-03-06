@@ -23,6 +23,8 @@ def respond_success(data=None):
     return respond_json(0, data)
 
 
+player_cancel_prepare_event = Message(4)
+player_prepare_event = Message(3)
 player_leave_event = Message(2)
 player_join_event = Message(1)
 
@@ -30,3 +32,4 @@ missing_parameters_error = respond_json(-1, "missing parameters")
 unknown_command = respond_json(-2, "unknown command")
 unknown_uuid_error = respond_json(-3, "unknown player")
 unknown_room_id = respond_json(-4, "unknown room id")
+room_is_full = respond_json(-5, "room is full")
