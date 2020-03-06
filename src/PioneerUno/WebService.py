@@ -24,7 +24,7 @@ async def get_rooms(request):
 def handle_create_room(player):
     new_room = add_room()
     new_room.add_player(player)
-    return new_room.id
+    return respond_success(new_room.id)
 
 
 def handle_ping(player):
@@ -33,7 +33,7 @@ def handle_ping(player):
 
 command_handler = {
     "create_room": handle_create_room,
-    "ping": handle_ping
+    "ping": handle_ping,
 }
 
 
@@ -59,6 +59,10 @@ async def websocket_handler(request):
                 raise
         elif msg.type == aiohttp.WSMsgType.ERROR:
             print(ws.exception())
+            break
+
+    player.leave_room()
+    print("disconnected")
 
 
 app.add_routes(routes)

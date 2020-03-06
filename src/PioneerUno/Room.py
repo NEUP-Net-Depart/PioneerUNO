@@ -12,6 +12,15 @@ class Room:
 
     def add_player(self, player: Player):
         self.players[player.id] = player
+        player.room = self
+
+    def remove_player(self, player: Player):
+        del self.players[player.id]
+        if len(self.players) == 0:
+            self.close()
+
+    def close(self):
+        del rooms[self.id]
 
 
 def get_all_room() -> list:
