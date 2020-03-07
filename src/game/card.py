@@ -7,7 +7,7 @@ class CardColor(IntEnum):
     green = 3
     blue = 4
     # 注意：玩家打出黑色牌的时候，传入的参数中自动带有希望转成的颜色，效果类似于“红+4”、“绿换色”等等。
-    black = 0
+    black = 5
     unset = 0
 
 
