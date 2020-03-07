@@ -1,8 +1,8 @@
 import asyncio
 import uuid
-from threading import Timer
 
-from src.lobby.Message import player_join_event, player_leave_event, player_prepare_event
+from src.lobby.Message import player_join_event, player_leave_event, player_prepare_event, game_start_event, \
+    start_countdown_event
 from src.lobby.Player import Player
 
 rooms = {}
@@ -10,11 +10,9 @@ rooms = {}
 
 class Room:
     def __init__(self, max_player: int):
-        self.timer = Timer(1.0, self.__on_count_down)
         self.id = str(uuid.uuid4())
         self.max_player = max_player
         self.players = {}
-        self.prepare = 0
 
     async def add_player(self, player: Player):
         if len(self.players) == self.max_player:
@@ -38,22 +36,42 @@ class Room:
             }
         ))
 
-    async def on_prepare(self, player: Player, state: bool):
-        await self.broadcast(player_prepare_event({
+    async def on_toggle_prepare_state(self, player: Player, state: bool):
+        player.isPrepared = state
+        await self.broadcast(player_prepare_event(
             {
-                'name': player.get_name()
+                'name': player.get_name(),
+                'state': player.isPrepared
             }
-        }))
+        ))
+        if self.is_everyone_ready() and len(self.players) == self.max_player:
+            await asyncio.gather(
+                self.broadcast(start_countdown_event),
+                self.start_count_down()
+            )
 
-        for player in self.players:
+    def is_everyone_ready(self):
+        for player in self.players.values():
             if player.isPrepared is False:
-                return
+                return False
+        return True
 
-    def start_count_down(self):
-        pass
+    async def start_count_down(self):
+        count = 10
+        while True:
+            count = count - 1
+            print(count)
+            await asyncio.sleep(1)
+            if self.is_everyone_ready():
+                if count <= 0:
+                    await self.start_game()
+                    break
+            else:
+                break
 
-    def __on_count_down(self):
-        pass
+    async def start_game(self):
+        print("game start!")
+        await self.broadcast(game_start_event)
 
     def close(self):
         del rooms[self.id]
@@ -71,7 +89,7 @@ def get_all_room() -> list:
     return list(rooms.keys())
 
 
-def add_room() -> Room:
-    room = Room()
+def add_room(max_player=2) -> Room:
+    room = Room(max_player)
     rooms[room.id] = room
     return room

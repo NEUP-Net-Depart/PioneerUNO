@@ -20,7 +20,7 @@ class Player:
     async def send_message(self, message):
         await self.conn.send_json(message.json())
 
-    async def toggle_prepare(self, state: bool):
+    async def toggle_preparing_state(self, state: bool):
         self.isPrepared = state
         if self.room is not None:
-            await self.room.on_prepare(self, state)
+            await self.room.on_toggle_prepare_state(self, state)

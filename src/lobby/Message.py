@@ -23,6 +23,9 @@ def respond_success(data=None):
     return respond_json(0, data)
 
 
+start_countdown_event = Message(11)
+game_start_event = Message(10)
+
 player_cancel_prepare_event = Message(4)
 player_prepare_event = Message(3)
 player_leave_event = Message(2)

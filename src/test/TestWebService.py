@@ -36,7 +36,10 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
     async def test_create_room(self):
         async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws:
             await ws.send_json({
-                'command': 'create_room'
+                'command': 'create_room',
+                'data': {
+                    'max_player': 2
+                }
             })
 
             response = await ws.receive_json()
@@ -48,7 +51,10 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
     async def test_join_room(self):
         async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws1:
             await ws1.send_json({
-                'command': 'create_room'
+                'command': 'create_room',
+                'data': {
+                    'max_player': 2
+                }
             })
 
             response = await ws1.receive_json()
@@ -68,7 +74,10 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
     async def test_leave_room(self):
         async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws1:
             await ws1.send_json({
-                'command': 'create_room'
+                'command': 'create_room',
+                'data': {
+                    'max_player': 2
+                }
             })
 
             response = await ws1.receive_json()
@@ -89,6 +98,23 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
                 response2 = await ws2.receive_json()
                 self.assertTrue('234' in response1['data']['name'])
 
+    async def test_prepare(self):
+        async with self.client_session.ws_connect(host + "api/ws?nickname=233") as ws1:
+            await ws1.send_json({
+                'command': 'create_room',
+                'data': {
+                    'max_player': 2
+                }
+            })
+            await ws1.receive_json()
+            await ws1.send_json({
+                'command': 'toggle_prepare_state',
+                'data': {
+                    'state': True
+                }
+            })
+            response2 = await ws1.receive_json()
+            self.assertEqual(response2['status'], 3)
 
 if __name__ == '__main__':
     unittest.main()

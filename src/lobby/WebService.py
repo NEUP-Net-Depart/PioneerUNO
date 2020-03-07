@@ -23,7 +23,7 @@ async def get_rooms(request):
 
 
 async def handle_create_room(player, data):
-    new_room = add_room()
+    new_room = add_room(data.get('max_player', 2))
     await new_room.add_player(player)
     return respond_success(new_room.id)
 
@@ -53,14 +53,16 @@ async def handle_leave_room(player, data):
     return respond_success()
 
 
-async def handle_prepare(player, data):
-    pass
+async def handle_toggle_prepare_state(player, data):
+    await player.toggle_preparing_state(data.get('state', False))
+    return respond_success()
 
 
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
     "leave_room": handle_leave_room,
+    "toggle_prepare_state": handle_toggle_prepare_state,
     "ping": handle_ping,
 }
 
