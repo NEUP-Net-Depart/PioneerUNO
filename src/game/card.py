@@ -32,25 +32,26 @@ class Card():
         self.type = type
         self.value = value
 
-    def __str__(self):
+    def __repr__(self):
         return str((self.index, self.color, self.type, self.value))
 
     @staticmethod
     def GenerateAllCards():
         cards = []
         index = 0
-        for color in CardColor[0:3]:
+        for color in list(CardColor)[0:4]:
             for value in range(0, 10):
                 index += 1
                 cards.append(Card(color, CardType.basic, value, index))
             for value in range(1, 10):
                 index += 1
                 cards.append(Card(color, CardType.basic, value, index))
-            for card_type in CardType[1, 3]:
+            for card_type in list(CardType)[1:4]*2:
                 index += 1
                 cards.append(Card(color, card_type, 0, index))
-            for i in range(0, 4):
-                index += 1
-                cards.append(Card(CardColor.black, CardType.drawFour, 0, index))
-                index += 1
-                cards.append(Card(CardColor.black, CardType.changeColor, 0, index))
+        for i in range(0, 4):
+            index += 1
+            cards.append(Card(CardColor.black, CardType.drawFour, 0, index))
+            index += 1
+            cards.append(Card(CardColor.black, CardType.changeColor, 0, index))
+        return cards
