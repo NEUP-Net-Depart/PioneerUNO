@@ -6,7 +6,8 @@ class CardColor(IntEnum):
     yellow = 2
     green = 3
     blue = 4
-    black = 5
+    # 注意：玩家打出黑色牌的时候，传入的参数中自动带有希望转成的颜色，效果类似于“红+4”、“绿换色”等等。
+    black = 0
     unset = 0
 
 
@@ -30,3 +31,26 @@ class Card():
         self.color = color
         self.type = type
         self.value = value
+
+    def __str__(self):
+        return str((self.index, self.color, self.type, self.value))
+
+    @staticmethod
+    def GenerateAllCards():
+        cards = []
+        index = 0
+        for color in CardColor[0:3]:
+            for value in range(0, 10):
+                index += 1
+                cards.append(Card(color, CardType.basic, value, index))
+            for value in range(1, 10):
+                index += 1
+                cards.append(Card(color, CardType.basic, value, index))
+            for card_type in CardType[1, 3]:
+                index += 1
+                cards.append(Card(color, card_type, 0, index))
+            for i in range(0, 4):
+                index += 1
+                cards.append(Card(CardColor.black, CardType.drawFour, 0, index))
+                index += 1
+                cards.append(Card(CardColor.black, CardType.changeColor, 0, index))
