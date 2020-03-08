@@ -13,10 +13,24 @@ class Player:
         self.game = game
         self.seat = seat
 
+    def _remove_card(self, card_index):
+        for card in self.cards:
+            if card.index == card_index:
+                del card
+                return
+
+                # Put方法为用户的一般出牌，切牌请走Cut方法。
+
     def Put(self, card):  # type: (Card) -> None
-        self.cards.remove(card)
+        self._remove_card(card.index)
         self.game.put(card)
         self.operation_count = 0
+        return
+
+    # 这个是玩家的切牌。
+    def Cut(self, card):
+        self._remove_card(card.index)
+        self.game.cut(self, card)
         return
 
     def Draw(self):

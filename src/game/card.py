@@ -36,9 +36,9 @@ class Card():
         return str((self.index, self.color, self.type, self.value))
 
     @staticmethod
-    def GenerateAllCards():
+    def GenerateAllCards(start_index=1):
         cards = []
-        index = 0
+        index = start_index - 1
         for color in list(CardColor)[0:4]:
             for value in range(0, 10):
                 index += 1
@@ -46,7 +46,7 @@ class Card():
             for value in range(1, 10):
                 index += 1
                 cards.append(Card(color, CardType.basic, value, index))
-            for card_type in list(CardType)[1:4]*2:
+            for card_type in list(CardType)[1:4] * 2:
                 index += 1
                 cards.append(Card(color, card_type, 0, index))
         for i in range(0, 4):
