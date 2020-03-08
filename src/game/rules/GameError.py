@@ -18,5 +18,19 @@ class PlayerPutBlackCardError(GameError):
 class PlayerCutBlackCardError(GameError):
     pass
 
+
 class PlayerCutCardsNotEqualToCurrentError(GameError):
+    pass
+
+
+class PlayerPutCardNotCorrectWithLastCardError(GameError):
+    pass
+
+
+# 玩家在被+2+4的时候出非加牌
+class PlayerPutNormalCardWhenUnderAdmonish:
+    pass
+
+
+class PlayerLastCardIsFunctionalCardError:
     pass

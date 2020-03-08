@@ -82,3 +82,7 @@ class Game:
         self.current_player_index = player.seat
         self.put(card)
         return
+
+    def win(self, winner):  # type: (Player) -> None
+        # 有人赢了？？？把他从玩家列表里丢出去（
+        self.player_list.pop(winner.seat - 1)

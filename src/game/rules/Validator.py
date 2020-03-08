@@ -24,7 +24,8 @@ class Validator:
         if self.game.current_player_index != self.player.seat:
             raise PlayerPutCardsNotAtHisTurnError
 
-    def _cannot_put_black_card(self, card):
+    @staticmethod
+    def _cannot_put_black_card(card):
         if card.color == CardColor.black:
             raise PlayerPutBlackCardError
 
@@ -47,10 +48,30 @@ class Validator:
         self._cannot_put_black_card(card)
         current_card = self.game.current_card
         # 黑色牌可以随意出。
-        # 非黑色牌，要么和上一张牌颜色相同，要么都为基本牌且value相同，要么都为功能牌且type相同。
+        # 想到了：黑牌不可以随意出。如果玩家还有需要多模的牌，他要么出"+2"要么出"+4"。
+        if self.game.current_count_of_cards_need_to_draw > 1:
+            # 如果玩家正在被“+2”或“+4”，他的出牌只能局限于加牌，他不能出任何其他的牌。
+            if card.type != CardType.drawTwo or card.type != CardType.drawFour:
+                raise PlayerPutNormalCardWhenUnderAdmonish
+        # 如果玩家的此次出牌是他的最后一张牌，那么这张牌不能为功能牌。
+        if len(self.player.cards) == 1 and card.type != CardType.basic:
+            raise PlayerLastCardIsFunctionalCardError
+        # 非黑色牌，要么和上一张牌颜色相同，要么都为功能牌且type相同，要么都为基本牌且value相同。
         if card.type == CardType.drawFour or card.type == CardType.changeColor:
             return
         elif card.color == current_card.color:
             return
-        elif card.type in [CardType.drawTwo, CardType.turn, CardType.]
-        if card.color == current_card.color or (card.type == CardType.basic and current_card.type == CardType.basic and card.value == current_card.value) or ()
+        elif card.type in [CardType.drawTwo, CardType.turn, CardType.ban]:
+            if card.type == current_card.type:
+                return
+            else:
+                raise PlayerPutCardNotCorrectWithLastCardError
+        elif card.type == CardType.basic and current_card.type == CardType.basic:
+            if card.value == current_card.value:
+                return
+            else:
+                raise PlayerPutCardNotCorrectWithLastCardError
+
+    # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
+    def canDraw(self):
+        self._player_must_next()

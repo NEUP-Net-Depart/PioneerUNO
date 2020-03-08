@@ -19,13 +19,16 @@ class Player:
                 del card
                 return
 
-                # Put方法为用户的一般出牌，切牌请走Cut方法。
-
-    def Put(self, card):  # type: (Card) -> None
+    # Put方法为用户的一般出牌，切牌请走Cut方法。
+    def Put(self, card):  # type: (Card) -> bool
         self._remove_card(card.index)
         self.game.put(card)
         self.operation_count = 0
-        return
+        if len(self.cards) == 0:
+            # 恭喜你，你赢了！
+            self.game.win(self)
+            return True
+        return False
 
     # 这个是玩家的切牌。
     def Cut(self, card):
