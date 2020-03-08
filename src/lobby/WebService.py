@@ -3,8 +3,7 @@ import json
 import aiohttp
 from aiohttp import web
 
-from src.lobby.Message import respond_success, unknown_command, missing_parameters_error, unknown_room_id, \
-    room_is_full
+from src.lobby.Message import *
 from src.lobby.Player import Player
 from src.lobby.Room import get_all_room, add_room, rooms
 
@@ -33,6 +32,9 @@ async def handle_ping(player, data):
 
 
 async def handle_join_room(player, data):
+    if player.room is not None:
+        return already_in_room
+
     try:
         room = rooms[data['id']]
     except KeyError:
@@ -58,12 +60,18 @@ async def handle_toggle_prepare_state(player, data):
     return respond_success()
 
 
+async def handle_put_card(player, data):
+    await player.put_card(data)
+    return respond_success()
+
+
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
     "leave_room": handle_leave_room,
     "toggle_prepare_state": handle_toggle_prepare_state,
     "ping": handle_ping,
+    "put_card": handle_put_card,
 }
 
 

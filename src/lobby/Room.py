@@ -1,18 +1,24 @@
 import asyncio
 import uuid
 
-from src.lobby.Message import player_join_event, player_leave_event, player_prepare_event, game_start_event, \
-    start_countdown_event
+from src.game.card import Card
+from src.game.game import Game
+from src.lobby.Adaptor import serialize_card
+from src.lobby.Message import *
 from src.lobby.Player import Player
 
 rooms = {}
 
 
 class Room:
-    def __init__(self, max_player: int):
+    def __init__(self, max_player: int, initial_card_amount: int):
+        self.game = None
         self.id = str(uuid.uuid4())
         self.max_player = max_player
         self.players = {}
+        self.player_role = {}
+        self.role_player = {}
+        self.initial_card_amount = initial_card_amount
 
     async def add_player(self, player: Player):
         if len(self.players) == self.max_player:
@@ -30,6 +36,8 @@ class Room:
         del self.players[player.id]
         if len(self.players) == 0:
             self.close()
+        if self.game is not None:
+            await self.broadcast(game_interrupted_event())
         await self.broadcast(player_leave_event(
             {
                 'name': player.get_name()
@@ -71,10 +79,64 @@ class Room:
 
     async def start_game(self):
         print("game start!")
+        self.game = Game(self.max_player, self.initial_card_amount)
+        for index, player in enumerate(self.players.values()):
+            self.player_role[player] = self.game.player_list[index]
+            self.role_player[self.game.player_list[index]] = player
         await self.broadcast(game_start_event)
+
+    async def on_put_card(self, player: Player, card: Card):
+        role = self.player_role[player]
+        result = role.Put(card)
+        await self.broadcast({
+            'player': player.nickname,
+            'card': player_put_card_event(serialize_card(card))
+        })
+        if result:
+            await self.draw_card(self.get_current_role())
+        else:
+            self.game.win(role)
+            await self.broadcast(player_win_event(
+                {
+                    'name': player.get_name()
+                }
+            ))
+            if len(self.game.player_list) > 1:
+                await self.broadcast(game_finished_event())
+                self.game = None
+                self.player_role = {}
+
+    async def on_skip_turn(self, player: Player):
+        role = self.player_role[player]
+        role.Go()
+        await self.broadcast(player_skip_turn_event({
+            'name': player.get_name()
+        }))
+
+    async def on_cut_card(self, player: Player, card: Card):
+        role = self.player_role[player]
+        role.Cut(role, card)
+        await self.broadcast(player_cut_card_event({
+            'name': player.get_name()
+        }))
+
+    async def draw_card(self, role):
+        player = self.role_player[role]
+        card = role.Draw()
+        await asyncio.gather(
+            self.broadcast(player_draw_card_event({
+                'name': player.get_name()
+            })),
+            player.send_message(player_get_card_event({
+                'card': serialize_card(card)
+            }))
+        )
 
     def close(self):
         del rooms[self.id]
+
+    def get_current_role(self):
+        return self.game.player_list[self.game.current_player_index]
 
     async def broadcast(self, message):
         await asyncio.gather(

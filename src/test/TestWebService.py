@@ -116,5 +116,6 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
             response2 = await ws1.receive_json()
             self.assertEqual(response2['status'], 3)
 
+
 if __name__ == '__main__':
     unittest.main()

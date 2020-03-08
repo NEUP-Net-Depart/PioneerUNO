@@ -1,5 +1,7 @@
 import uuid
 
+from src.game.card import Card
+
 
 class Player:
     def __init__(self, nickname, conn=None):
@@ -24,3 +26,6 @@ class Player:
         self.isPrepared = state
         if self.room is not None:
             await self.room.on_toggle_prepare_state(self, state)
+
+    async def put_card(self, card: Card):
+        self.room.on_put_card(self, card)
