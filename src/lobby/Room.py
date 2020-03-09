@@ -19,6 +19,7 @@ class Room:
         self.player_role = {}
         self.role_player = {}
         self.initial_card_amount = initial_card_amount
+        self.timer = None
 
     async def add_player(self, player: Player):
         if len(self.players) == self.max_player:
@@ -88,10 +89,14 @@ class Room:
     async def on_put_card(self, player: Player, card: Card):
         role = self.player_role[player]
         result = role.Put(card)
+        if self.timer is not None:
+            self.timer.cancel()
+
         await self.broadcast({
             'player': player.nickname,
             'card': player_put_card_event(serialize_card(card))
         })
+
         if result:
             await self.draw_card(self.get_current_role())
         else:
@@ -109,6 +114,8 @@ class Room:
     async def on_skip_turn(self, player: Player):
         role = self.player_role[player]
         role.Go()
+        if self.timer is not None:
+            self.timer.cancel()
         await self.broadcast(player_skip_turn_event({
             'name': player.get_name()
         }))
@@ -132,6 +139,14 @@ class Room:
             }))
         )
 
+        self.timer = asyncio.create_task(self.wait_for_command(role))
+
+    async def wait_for_command(self, role):
+        count = 0
+        while count < 30:
+            count = count + 1
+        await self.on_skip_turn(self.role_player[role])
+
     def close(self):
         del rooms[self.id]
 
@@ -148,7 +163,14 @@ class Room:
 
 
 def get_all_room() -> list:
-    return list(rooms.keys())
+    return [
+        {
+            'id': i,
+            'current_player': len(i.players),
+            'max_player': i.max_player
+        }
+        for i in rooms
+    ]
 
 
 def add_room(max_player=2) -> Room:
