@@ -21,7 +21,7 @@ class Validator:
 
     # 玩家是否为下一个应该出牌的人？
     def _player_must_next(self):
-        if self.game.current_player_index != self.player.seat:
+        if self.game.current_player_seat != self.player.seat:
             raise PlayerPutCardsNotAtHisTurnError
 
     @staticmethod
@@ -29,8 +29,12 @@ class Validator:
         if card.color == CardColor.black:
             raise PlayerPutBlackCardError
 
+    # 对当前玩家Validator应用检验，返回该玩家是否需要UNO。
+    def needUNO(self):
+        return len(self.player.cards) == 1
+
     # 玩家是否可以切牌？
-    def canCut(self, card):
+    def canCut(self, card):  # type: (Card) -> None
         self._have_card_check(card)
         # 黑色牌（加四牌和换色牌）不能切
         if card.type == CardType.drawFour or card.type == CardType.changeColor:
@@ -42,7 +46,7 @@ class Validator:
             raise PlayerCutCardsNotEqualToCurrentError
 
     # 玩家是否可以出牌？
-    def canPut(self, card):
+    def canPut(self, card):  # type: (Card) -> None
         self._player_must_next()
         self._have_card_check(card)
         self._cannot_put_black_card(card)
@@ -73,5 +77,5 @@ class Validator:
                 raise PlayerPutCardNotCorrectWithLastCardError
 
     # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
-    def canDraw(self):
+    def canDraw(self):  # type: () -> None
         self._player_must_next()
