@@ -35,3 +35,6 @@ class Player:
 
     async def cut_card(self, card: Card):
         self.room.on_cut_card(self, card)
+
+    async def uno(self):
+        self.room.on_uno(self)

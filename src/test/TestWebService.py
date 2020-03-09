@@ -108,7 +108,7 @@ class TestWebService(unittest.IsolatedAsyncioTestCase):
             })
             await ws1.receive_json()
             await ws1.send_json({
-                'command': 'toggle_prepare_state',
+                'command': 'toggle_preparation_state',
                 'data': {
                     'state': True
                 }

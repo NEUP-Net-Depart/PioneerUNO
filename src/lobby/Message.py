@@ -28,6 +28,8 @@ game_finished_event = Message(120)
 start_countdown_event = Message(110)
 game_start_event = Message(100)
 
+player_doubt_uno_event = Message(12)
+player_uno_event = Message(11)
 player_win_event = Message(10)
 player_cut_card_event = Message(9)
 player_get_card_event = Message(8)

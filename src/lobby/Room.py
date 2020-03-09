@@ -10,6 +10,13 @@ from src.lobby.Player import Player
 rooms = {}
 
 
+async def wait_for_command(on_time_out):
+    count = 0
+    while count < 30:
+        count = count + 1
+    await on_time_out
+
+
 class Room:
     def __init__(self, max_player: int, initial_card_amount: int):
         self.game = None
@@ -89,6 +96,7 @@ class Room:
     async def on_put_card(self, player: Player, card: Card):
         role = self.player_role[player]
         result = role.Put(card)
+        self.cancel_timer()
         if self.timer is not None:
             self.timer.cancel()
 
@@ -98,9 +106,6 @@ class Room:
         })
 
         if result:
-            await self.draw_card(self.get_current_role())
-        else:
-            self.game.win(role)
             await self.broadcast(player_win_event(
                 {
                     'name': player.get_name()
@@ -110,24 +115,53 @@ class Room:
                 await self.broadcast(game_finished_event())
                 self.game = None
                 self.player_role = {}
+        else:
+            await self.draw_card()
 
     async def on_skip_turn(self, player: Player):
         role = self.player_role[player]
         role.Go()
+        self.cancel_timer()
         if self.timer is not None:
             self.timer.cancel()
-        await self.broadcast(player_skip_turn_event({
-            'name': player.get_name()
-        }))
+
+        await asyncio.gather(
+            self.broadcast(player_skip_turn_event({
+                'name': player.get_name()
+            })),
+            self.draw_card()
+        )
 
     async def on_cut_card(self, player: Player, card: Card):
         role = self.player_role[player]
         role.Cut(role, card)
+        self.cancel_timer()
         await self.broadcast(player_cut_card_event({
             'name': player.get_name()
         }))
+        await self.draw_card()
 
-    async def draw_card(self, role):
+    async def on_uno(self, player: Player):
+        role = self.player_role[player]
+        role.Uno()
+        await self.broadcast(player_uno_event({
+            'name': player.get_name()
+        }))
+
+    async def on_doubt_uno(self, player: Player, data):
+        role = self.player_role[player]
+        target = data['target_player']
+        for i in self.players:
+            if target == i.get_name():
+                role.DoubtUno(self.player_role[i])
+                await self.broadcast(player_doubt_uno_event({
+                    'from': i.get_name(),
+                    'to': player.get_name()
+                }))
+                return
+
+    async def draw_card(self):
+        role = self.get_current_role()
         player = self.role_player[role]
         card = role.Draw()
         await asyncio.gather(
@@ -139,13 +173,7 @@ class Room:
             }))
         )
 
-        self.timer = asyncio.create_task(self.wait_for_command(role))
-
-    async def wait_for_command(self, role):
-        count = 0
-        while count < 30:
-            count = count + 1
-        await self.on_skip_turn(self.role_player[role])
+        self.start_timer(self.on_skip_turn(role))
 
     def close(self):
         del rooms[self.id]
@@ -160,6 +188,14 @@ class Room:
                 for player in self.players.values()
             ]
         )
+
+    def start_timer(self, on_time_out):
+        self.timer = asyncio.create_task(wait_for_command(on_time_out))
+
+    def cancel_timer(self):
+        if self.timer is not None:
+            self.timer.cancel()
+            self.timer = None
 
 
 def get_all_room() -> list:

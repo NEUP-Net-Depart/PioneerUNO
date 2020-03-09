@@ -76,15 +76,20 @@ async def handle_cut_card(player, data):
     return respond_success()
 
 
+async def handle_uno(player, data):
+    await player.uno
+
+
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
     "leave_room": handle_leave_room,
-    "toggle_prepare_state": handle_toggle_prepare_state,
+    "toggle_preparation_state": handle_toggle_prepare_state,
     "ping": handle_ping,
     "put_card": handle_put_card,
     "skip_turn": handle_skip_turn,
-    "cut_card": handle_cut_card
+    "cut_card": handle_cut_card,
+    "uno": handle_uno
 }
 
 
