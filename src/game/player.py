@@ -1,6 +1,7 @@
 from typing import List
 
 from src.game.card import Card
+from src.game.game import Game
 
 
 class Player:
@@ -8,6 +9,7 @@ class Player:
     seat = 0  # 玩家在房间中的位置
     operation_count = 0  # 玩家在当前回合进行的操作数量
     game = None  # type: Game # 玩家通过game属性访问自己所处的游戏实例。
+    uno = False # type: bool # 玩家喊uno了吗？玩家的uno状态会在玩家准备出牌前置为false。玩家设计上可以随时uno，但客户端应该保证他尽量在他自己的回合uno。
 
     def __init__(self, game, seat):
         self.game = game
@@ -20,7 +22,8 @@ class Player:
                 return
 
     # Put方法为用户的一般出牌，切牌请走Cut方法。
-    def Put(self, card):  # type: (Card) -> bool
+    def Put(self, card):  # type: (Card) -> bool # 返回获胜与否。
+        self.uno = False  # 玩家出牌之前，它uno的状态便不复存在，**这里不存在任何设计问题，写这段代码的人是Neboer，欢迎与我对线。**
         self._remove_card(card.index)
         self.game.put(card)
         self.operation_count = 0
@@ -31,18 +34,18 @@ class Player:
         return False
 
     # 这个是玩家的切牌。
-    def Cut(self, card):
+    def Cut(self, card):  # type: (Player) -> None
         self._remove_card(card.index)
         self.game.cut(self, card)
         return
 
-    def Draw(self):
-        card = self.game.draw()
-        self.cards.append(card)
+    def Draw(self):  # type: () -> List[Card]
+        cards = self.game.draw()
+        self.cards += cards
         self.operation_count += 1
-        return card  # 将用户抽到的卡片返回给调用者
+        return cards  # 将用户抽到的卡片返回给调用者
 
-    def Go(self):
+    def Go(self):  # type: () -> None
         self.game.go()  # 用户不出牌。
         self.operation_count = 0
         return

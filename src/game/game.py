@@ -1,19 +1,20 @@
+from typing import List
 from src.game.card import Card, CardColor, CardType
 from random import shuffle
 from src.game.player import Player
 
 
 class Game:
-    player_list = []
-    card_pool = []  # 自动洗牌。
+    player_list = []  # type: List[Player]
+    card_pool = []  # type: List[Card] # 自动洗牌。
     shuffle_times = 0  # 洗过几次牌？在一开始应该算一次，这个值用来生成牌index。
-    current_player_index = 0  # 现在应该进行操作的玩家
-    current_take_turns_positive = True  # 游戏正向进行，下一个出牌的玩家编号应该为(当前编号+1或2)%人数。
+    current_player_seat = 0  # 现在应该进行操作的玩家seat，也是从1开始
+    current_take_turns_positive = True  # type: bool# 游戏正向进行，下一个出牌的玩家编号应该为(当前编号+1或2)%人数。
     current_count_of_cards_need_to_draw = 0  # 加牌叠加的数量
-    current_card = None  # 当前状态位于牌堆顶的卡片
+    current_card = None  # type: Card # 当前状态位于牌堆顶的卡片
 
     # 牌总是从后向前pop的，也就是优先弹出index较大的。如果牌不够了，就先pop全部然后洗牌再pop。
-    def _pop_cards(self, number):
+    def _pop_cards(self, number):  # type: (int) -> List[Card]
         if len(self.card_pool) < number:
             part_one = self.card_pool
             self._shuffle()
@@ -35,15 +36,15 @@ class Game:
         self._shuffle()
         for player in self.player_list:
             player.cards = self._pop_cards(draw_cards)  # 发牌
-        self.current_player_index = 1
+        self.current_player_seat = 1
         self.current_take_turns_positive = True
         self.current_count_of_cards_need_to_draw = 1
 
-    def _next_player(self, value=1):
+    def _next_player(self, value=1):  # type: (int) -> None
         if self.current_take_turns_positive:
-            self.current_player_index = (self.current_player_index + value) % len(self.player_list)
+            self.current_player_seat = (self.current_player_seat + value) % len(self.player_list)
         else:
-            self.current_player_index = (self.current_player_index - value) % len(self.player_list)
+            self.current_player_seat = (self.current_player_seat - value) % len(self.player_list)
 
     def _shuffle(self):
         self.card_pool = shuffle(Card.GenerateAllCards(108 * self.shuffle_times + 1))
@@ -67,19 +68,19 @@ class Game:
         self._next_player()
         return
 
-    def draw(self):
+    def draw(self):  # type: () -> List[Card]
         prepare_cards = self._pop_cards(self.current_count_of_cards_need_to_draw)
         self.current_count_of_cards_need_to_draw = 1  # 用户摸牌后，牌局总需要摸牌的数量归1
         # 玩家摸牌后，对局不继续进行，等待他的下一步操作。
         return prepare_cards
 
-    def go(self):
+    def go(self):  # type: () -> None
         self._next_player()
 
     # cut是玩家切牌。玩家切牌后，游戏就从玩家处继续进行。
     def cut(self, player, card):  # type: (Player, Card) -> None
         # 玩家切牌的逻辑也很简单，只需要把“出牌”的发生地改成切牌玩家的seat然后再出牌就可以。
-        self.current_player_index = player.seat
+        self.current_player_seat = player.seat
         self.put(card)
         return
 

@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from typing import List
+
 
 class CardColor(IntEnum):
     red = 1
@@ -36,7 +38,7 @@ class Card():
         return str((self.index, self.color, self.type, self.value))
 
     @staticmethod
-    def GenerateAllCards(start_index=1):
+    def GenerateAllCards(start_index=1):  # type: (int) -> List[Card]
         cards = []
         index = start_index - 1
         for color in list(CardColor)[0:4]:
