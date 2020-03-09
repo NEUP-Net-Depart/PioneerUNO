@@ -29,3 +29,9 @@ class Player:
 
     async def put_card(self, card: Card):
         self.room.on_put_card(self, card)
+
+    async def skip_turn(self):
+        self.room.on_skip_turn(self)
+
+    async def cut_card(self, card: Card):
+        self.room.on_cut_card(self, card)

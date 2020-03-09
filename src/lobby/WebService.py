@@ -3,6 +3,7 @@ import json
 import aiohttp
 from aiohttp import web
 
+from src.lobby.Adaptor import deserialize_card
 from src.lobby.Message import *
 from src.lobby.Player import Player
 from src.lobby.Room import get_all_room, add_room, rooms
@@ -61,7 +62,17 @@ async def handle_toggle_prepare_state(player, data):
 
 
 async def handle_put_card(player, data):
-    await player.put_card(data)
+    await player.put_card(deserialize_card(data))
+    return respond_success()
+
+
+async def handle_skip_turn(player, data):
+    await player.skip_turn()
+    return respond_success()
+
+
+async def handle_cut_card(player, data):
+    await player.cut_card(deserialize_card(data))
     return respond_success()
 
 
@@ -72,6 +83,8 @@ command_handler = {
     "toggle_prepare_state": handle_toggle_prepare_state,
     "ping": handle_ping,
     "put_card": handle_put_card,
+    "skip_turn": handle_skip_turn,
+    "cut_card": handle_cut_card
 }
 
 
