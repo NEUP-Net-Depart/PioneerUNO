@@ -88,3 +88,8 @@ class Game:
         # 有人赢了？？？把他从玩家列表里丢出去（
         # TODO: 这个做法十分不负责任（
         self.player_list.pop(winner.seat - 1)
+
+    def punishUno(self, target_player):  # type: (Player) -> None
+        # 玩家没有uno！
+        target_player.cards += self._pop_cards(2)
+        return

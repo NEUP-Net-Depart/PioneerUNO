@@ -34,3 +34,11 @@ class PlayerPutNormalCardWhenUnderAdmonish:
 
 class PlayerLastCardIsFunctionalCardError:
     pass
+
+
+class PlayerUnoWithManyCardsError:
+    pass
+
+
+class DoubtTargetPlayerNotInPlayerListError:
+    pass

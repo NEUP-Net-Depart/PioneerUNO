@@ -79,3 +79,11 @@ class Validator:
     # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
     def canDraw(self):  # type: () -> None
         self._player_must_next()
+
+    def canUno(self):  # type: () -> None
+        if len(self.player.cards) > 1:
+            raise PlayerUnoWithManyCardsError
+
+    def canDoubtUno(self, player):  # type: (Player) -> None
+        if player not in self.game.player_list:
+            raise DoubtTargetPlayerNotInPlayerListError
