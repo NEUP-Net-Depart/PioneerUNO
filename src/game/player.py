@@ -1,7 +1,7 @@
 from typing import List
 
 from src.game.card import Card
-from src.game.game import Game
+# from src.game.game import Game
 from src.game.rules.Validator import Validator
 
 
@@ -10,7 +10,7 @@ class Player:
     cards = []  # type: List[Card]
     seat = 0  # 玩家在房间中的位置
     operation_count = 0  # 玩家在当前回合进行的操作数量
-    game = None  # type: Game # 玩家通过game属性访问自己所处的游戏实例。
+    game = None  # type: # 玩家通过game属性访问自己所处的游戏实例。
     uno = False  # type: bool # 玩家喊uno了吗？玩家的uno状态会在玩家准备出牌前置为false。玩家设计上可以随时uno，但客户端应该保证他尽量在他自己的回合uno。
 
     def __init__(self, game, seat):

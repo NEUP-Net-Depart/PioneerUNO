@@ -1,14 +1,13 @@
-from src.game.game import Game
+
 from src.game.card import Card, CardType, CardColor
-from src.game.player import Player
 from src.game.rules.GameError import *
 
 
 # Validator是和Game中的玩家对象一一对应的关系，每个玩家都有自己的校验器，方法和玩家对象的方法基本相同，用来在玩家进行不同操作之前校验其是否可以操作。
 # 你指尖跃动的电光，是我此生不变的信仰！
 class Validator:
-    game = None  # type: Game
-    player = None  # type: Player
+    game = None
+    player = None
 
     def __init__(self, game_obj, player_obj):
         self.game = game_obj
