@@ -100,10 +100,10 @@ class Room:
         if self.timer is not None:
             self.timer.cancel()
 
-        await self.broadcast({
+        await self.broadcast(player_put_card_event({
             'player': player.nickname,
-            'card': player_put_card_event(serialize_card(card))
-        })
+            'card': serialize_card(card)
+        }))
 
         if result:
             await self.broadcast(player_win_event(

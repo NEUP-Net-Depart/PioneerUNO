@@ -23,9 +23,9 @@ def respond_success(data=None):
     return respond_json(0, data)
 
 
-game_interrupted_event = Message(130)
-game_finished_event = Message(120)
-start_countdown_event = Message(110)
+game_interrupted_event = Message(103)
+game_finished_event = Message(102)
+start_countdown_event = Message(101)
 game_start_event = Message(100)
 
 player_doubt_uno_event = Message(12)
@@ -36,7 +36,7 @@ player_get_card_event = Message(8)
 player_skip_turn_event = Message(7)
 player_put_card_event = Message(6)
 player_draw_card_event = Message(5)
-player_cancel_prepare_event = Message(4)
+player_cancel_preparation_event = Message(4)
 player_prepare_event = Message(3)
 player_leave_event = Message(2)
 player_join_event = Message(1)
