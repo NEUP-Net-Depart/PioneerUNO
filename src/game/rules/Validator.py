@@ -50,6 +50,12 @@ class Validator:
         self._have_card_check(card)
         self._cannot_put_black_card(card)
         current_card = self.game.current_card
+        # 如果玩家出的是本轮的第一章牌，那么有额外的限制。
+        if not current_card:
+            if card.type != CardType.basic:
+                raise FirstCardIsFunctionalCardError
+            else:
+                return
         # 黑色牌可以随意出。
         # 想到了：黑牌不可以随意出。如果玩家还有需要多模的牌，他要么出"+2"要么出"+4"。
         if self.game.current_count_of_cards_need_to_draw > 1:

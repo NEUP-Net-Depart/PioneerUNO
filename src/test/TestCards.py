@@ -1,3 +1,5 @@
 from src.game.card import Card
 
-print(Card.GenerateAllCards())
+cards = Card.GenerateAllCards()
+for i in cards:
+    print(i)

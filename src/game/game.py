@@ -47,7 +47,8 @@ class Game:
             self.current_player_seat = (self.current_player_seat - value) % len(self.player_list)
 
     def _shuffle(self):
-        self.card_pool = shuffle(Card.GenerateAllCards(108 * self.shuffle_times + 1))
+        self.card_pool = Card.GenerateAllCards(108 * self.shuffle_times + 1)
+        shuffle(self.card_pool)
         self.shuffle_times += 1
 
     # player methods

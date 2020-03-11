@@ -28,17 +28,21 @@ class PlayerPutCardNotCorrectWithLastCardError(GameError):
 
 
 # 玩家在被+2+4的时候出非加牌
-class PlayerPutNormalCardWhenUnderAdmonish:
+class PlayerPutNormalCardWhenUnderAdmonish(GameError):
     pass
 
 
-class PlayerLastCardIsFunctionalCardError:
+class PlayerLastCardIsFunctionalCardError(GameError):
     pass
 
 
-class PlayerUnoWithManyCardsError:
+class PlayerUnoWithManyCardsError(GameError):
     pass
 
 
-class DoubtTargetPlayerNotInPlayerListError:
+class DoubtTargetPlayerNotInPlayerListError(GameError):
+    pass
+
+
+class FirstCardIsFunctionalCardError(GameError):
     pass
