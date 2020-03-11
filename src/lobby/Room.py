@@ -95,6 +95,7 @@ class Room:
 
     async def on_put_card(self, player: Player, card: Card):
         role = self.player_role[player]
+
         result = role.Put(card)
         self.cancel_timer()
         if self.timer is not None:
@@ -201,15 +202,15 @@ class Room:
 def get_all_room() -> list:
     return [
         {
-            'id': i,
+            'id': i.id,
             'current_player': len(i.players),
             'max_player': i.max_player
         }
-        for i in rooms
+        for i in rooms.values()
     ]
 
 
-def add_room(max_player=2) -> Room:
-    room = Room(max_player)
+def add_room(max_player=2, initial_card_amount=10) -> Room:
+    room = Room(max_player, initial_card_amount)
     rooms[room.id] = room
     return room

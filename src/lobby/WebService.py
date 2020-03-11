@@ -22,6 +22,15 @@ async def get_rooms(request):
     return web.json_response(respond_success(get_all_room()))
 
 
+@routes.post("/api/room/create")
+async def create_room(request):
+    body = await request.json()
+    max_player = body.get('max_player', 4)
+    initial_card_amount = body.get('initial_card_amount', 10)
+    add_room(max_player, initial_card_amount)
+    return web.json_response(respond_success())
+
+
 async def handle_create_room(player, data):
     new_room = add_room(data.get('max_player', 2))
     await new_room.add_player(player)
@@ -29,7 +38,9 @@ async def handle_create_room(player, data):
 
 
 async def handle_ping(player, data):
-    return respond_success('pong')
+    return respond_success({
+        'data': 'pong'
+    })
 
 
 async def handle_join_room(player, data):
@@ -80,6 +91,13 @@ async def handle_uno(player, data):
     await player.uno
 
 
+async def handle_get_rooms(*args, **kwargs):
+    return respond_success(
+        {
+            'rooms': get_all_room()
+        })
+
+
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
@@ -89,7 +107,8 @@ command_handler = {
     "put_card": handle_put_card,
     "skip_turn": handle_skip_turn,
     "cut_card": handle_cut_card,
-    "uno": handle_uno
+    "uno": handle_uno,
+    "rooms": handle_get_rooms
 }
 
 
@@ -102,7 +121,7 @@ async def websocket_handler(request):
 
     ws = web.WebSocketResponse()
     await ws.prepare(request)
-
+    print("get connection" + nickname)
     player = Player(nickname, ws)
 
     async for msg in ws:
