@@ -42,9 +42,13 @@ class Game:
 
     def _next_player(self, value=1):  # type: (int) -> None
         if self.current_take_turns_positive:
-            self.current_player_seat = (self.current_player_seat + value) % len(self.player_list)
+            self.current_player_seat += value
+            if self.current_player_seat > len(self.player_list):
+                self.current_player_seat -= len(self.player_list)
         else:
-            self.current_player_seat = (self.current_player_seat - value) % len(self.player_list)
+            self.current_player_seat -= value
+            if self.current_player_seat < 0:
+                self.current_player_seat += len(self.player_list)
 
     def _shuffle(self):
         self.card_pool = Card.GenerateAllCards(108 * self.shuffle_times + 1)
@@ -89,6 +93,11 @@ class Game:
         # 有人赢了？？？把他从玩家列表里丢出去（
         # TODO: 这个做法十分不负责任（
         self.player_list.pop(winner.seat - 1)
+
+    def current_player(self):
+        for player in self.player_list:
+            if player.seat == self.current_player_seat:
+                return player
 
     def punishUno(self, target_player):  # type: (Player) -> None
         # 玩家没有uno！
