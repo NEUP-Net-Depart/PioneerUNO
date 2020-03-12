@@ -5,6 +5,7 @@ from aiohttp import web
 
 from src.game.rules.GameError import *
 from src.lobby.Adaptor import deserialize_card
+from src.lobby.Decoration import catch_put_exceptions
 from src.lobby.Message import *
 from src.lobby.Player import Player
 from src.lobby.Room import get_all_room, add_room, rooms
@@ -64,24 +65,9 @@ async def handle_toggle_prepare_state(player, data):
     return respond_success()
 
 
+@catch_put_exceptions
 async def handle_put_card(player, data):
-    try:
-        await player.put_card(deserialize_card(data))
-    except FirstCardIsFunctionalCardError:
-        return invalid_first_card
-    except PlayerPutNormalCardWhenUnderAdmonish:
-        return invalid_placement_during_admonish
-    except PlayerLastCardIsFunctionalCardError:
-        return last_card_is_functional_card
-    except PlayerPutCardNotCorrectWithLastCardError:
-        return invalid_placement
-    except PlayerPutCardsNotAtHisTurnError:
-        return invalid_turn
-    except PlayerNoSuchCardError:
-        return no_such_card
-    except PlayerPutBlackCardError:
-        return put_black_card
-
+    await player.put_card(deserialize_card(data))
     return respond_success()
 
 
@@ -90,11 +76,14 @@ async def handle_skip_turn(player, data):
     return respond_success()
 
 
+@catch_put_exceptions
 async def handle_cut_card(player, data):
     try:
         await player.cut_card(deserialize_card(data))
-    except PlayerNoSuchCardError:
-        return PlayerNoSuchCardError
+    except PlayerPutBlackCardError:
+        return put_black_card
+    except PlayerCutCardsNotEqualToCurrentError:
+        return cut_card_not_equal
 
     return respond_success()
 
