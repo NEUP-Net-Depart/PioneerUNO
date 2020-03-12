@@ -19,9 +19,9 @@ class Player:
         self.validator = Validator(game, self)
 
     def _remove_card(self, card_index):
-        for card in self.cards:
+        for index, card in enumerate(self.cards):
             if card.index == card_index:
-                del card
+                del self.cards[index]
                 return
 
     # Put方法为用户的一般出牌，切牌请走Cut方法。
