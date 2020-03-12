@@ -47,7 +47,7 @@ class Game:
                 self.current_player_seat -= len(self.player_list)
         else:
             self.current_player_seat -= value
-            if self.current_player_seat < 0:
+            if self.current_player_seat < 1:
                 self.current_player_seat += len(self.player_list)
 
     def _shuffle(self):
