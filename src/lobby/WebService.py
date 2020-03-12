@@ -3,6 +3,7 @@ import json
 import aiohttp
 from aiohttp import web
 
+from src.game.rules.GameError import *
 from src.lobby.Adaptor import deserialize_card
 from src.lobby.Message import *
 from src.lobby.Player import Player
@@ -22,17 +23,8 @@ async def get_rooms(request):
     return web.json_response(respond_success(get_all_room()))
 
 
-@routes.post("/api/room/create")
-async def create_room(request):
-    body = await request.json()
-    max_player = body.get('max_player', 4)
-    initial_card_amount = body.get('initial_card_amount', 10)
-    add_room(max_player, initial_card_amount)
-    return web.json_response(respond_success())
-
-
 async def handle_create_room(player, data):
-    new_room = add_room(data.get('max_player', 2))
+    new_room = add_room(data.get('max_player', 2), data.get('initial_card_amount', 10))
     await new_room.add_player(player)
     return respond_success(new_room.id)
 
@@ -73,7 +65,23 @@ async def handle_toggle_prepare_state(player, data):
 
 
 async def handle_put_card(player, data):
-    await player.put_card(deserialize_card(data))
+    try:
+        await player.put_card(deserialize_card(data))
+    except FirstCardIsFunctionalCardError:
+        return invalid_first_card
+    except PlayerPutNormalCardWhenUnderAdmonish:
+        return invalid_placement_during_admonish
+    except PlayerLastCardIsFunctionalCardError:
+        return last_card_is_functional_card
+    except PlayerPutCardNotCorrectWithLastCardError:
+        return invalid_placement
+    except PlayerPutCardsNotAtHisTurnError:
+        return invalid_turn
+    except PlayerNoSuchCardError:
+        return no_such_card
+    except PlayerPutBlackCardError:
+        return put_black_card
+
     return respond_success()
 
 
@@ -83,7 +91,11 @@ async def handle_skip_turn(player, data):
 
 
 async def handle_cut_card(player, data):
-    await player.cut_card(deserialize_card(data))
+    try:
+        await player.cut_card(deserialize_card(data))
+    except PlayerNoSuchCardError:
+        return PlayerNoSuchCardError
+
     return respond_success()
 
 
