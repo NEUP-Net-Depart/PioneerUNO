@@ -12,7 +12,10 @@ def _update_player_block(game_obj, mainLayout):
 
 def generate_put_function(player, card, mainLayout):
     def putCard():
-        player.Put(card)
+        if player.game.current_player_seat == player.seat:
+            player.Put(card)
+        else:
+            player.Cut(card)
         _update_player_block(player.game, mainLayout)
 
     return putCard
@@ -25,6 +28,15 @@ def generate_draw_function(game, mainLayout):
         _update_player_block(game, mainLayout)
 
     return drawCard
+
+
+def generate_go_function(game, mainLayout):
+    def go():
+        player = game.current_player()
+        player.Go()
+        _update_player_block(game, mainLayout)
+
+    return go
 
 
 def render_player_block(game, mainLayout):  # type: (Game, QVBoxLayout) -> QWidget
@@ -54,6 +66,9 @@ def render_right_area(game, mainLayout):
     draw_card_btn = QPushButton("摸牌")
     draw_card_btn.clicked.connect(generate_draw_function(game, mainLayout))
     largest_layout.addWidget(draw_card_btn)
+    go_btn = QPushButton("过")
+    go_btn.clicked.connect(generate_go_function(game, mainLayout))
+    largest_layout.addWidget(go_btn)
     right_area_widget = QWidget()
     right_area_widget.setLayout(largest_layout)
     return right_area_widget

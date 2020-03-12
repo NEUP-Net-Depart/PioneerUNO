@@ -46,3 +46,11 @@ class DoubtTargetPlayerNotInPlayerListError(GameError):
 
 class FirstCardIsFunctionalCardError(GameError):
     pass
+
+
+class PlayerPassWithoutAction(GameError):
+    pass
+
+
+class PlayerDrewCardMultiTimesError(GameError):
+    pass

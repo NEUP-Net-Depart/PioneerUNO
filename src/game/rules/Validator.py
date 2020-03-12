@@ -1,4 +1,3 @@
-
 from src.game.card import Card, CardType, CardColor
 from src.game.rules.GameError import *
 
@@ -83,6 +82,8 @@ class Validator:
 
     # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
     def canDraw(self):  # type: () -> None
+        if self.player.drew_card:
+            raise PlayerDrewCardMultiTimesError
         self._player_must_next()
 
     def canUno(self):  # type: () -> None
@@ -92,3 +93,7 @@ class Validator:
     def canDoubtUno(self, player):  # type: (Player) -> None
         if player not in self.game.player_list:
             raise DoubtTargetPlayerNotInPlayerListError
+
+    def canGo(self):
+        if not self.player.drew_card:
+            raise PlayerPassWithoutAction
