@@ -1,5 +1,5 @@
 from src.game.game import Game, Player  #
-from src.game.card import Card  #
+from src.game.card import Card, CardColor  #
 from PyQt5.QtWidgets import *
 
 
@@ -10,9 +10,28 @@ def _update_player_block(game_obj, mainLayout):
     mainLayout.replaceWidget(widget_need_update, newWidgeter)
 
 
+def choose_color_widget(card):
+    dialog = QDialog()
+    dialog_layout = QHBoxLayout()
+    four_color = list(CardColor)[:4]
+
+    def changer():
+        card.color = one_color
+        dialog.close()
+
+    for one_color in four_color:
+        color_button = QPushButton(one_color.toStr())
+        color_button.clicked.connect(changer)
+        dialog_layout.addWidget(color_button)
+    dialog.setLayout(dialog_layout)
+    return dialog
+
+
 def generate_put_function(player, card, mainLayout):
     def putCard():
         if player.game.current_player_seat == player.seat:
+            if card.color == CardColor.black:
+                choose_color_widget(card).exec()
             player.Put(card)
         else:
             player.Cut(card)

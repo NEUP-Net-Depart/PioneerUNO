@@ -15,7 +15,6 @@ def generator(layouter):  # type: (QVBoxLayout) -> function
         widget_to_replace.close()
         layouter.replaceWidget(widget_to_replace, newLabel)
 
-
     return on_button_clicked
 
 

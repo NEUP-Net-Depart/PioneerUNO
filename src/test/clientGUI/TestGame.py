@@ -1,4 +1,5 @@
 from src.game.game import Game
+from src.game.rules.GameError import GameError
 from operator import attrgetter
 from src.test.clientGUI.GUItester import render_player_block, render_right_area
 from PyQt5.QtWidgets import *

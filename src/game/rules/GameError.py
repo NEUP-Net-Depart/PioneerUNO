@@ -54,3 +54,13 @@ class PlayerPassWithoutAction(GameError):
 
 class PlayerDrewCardMultiTimesError(GameError):
     pass
+
+
+# 按照先锋规则，玩家不应该切自己刚刚出的牌。
+class PlayerCutItsOwnCardError(GameError):
+    pass
+
+
+# 按照先锋规则，被禁玩家不能切禁自己的禁牌。
+class BannedPlayerCutBanCardError(GameError):
+    pass
