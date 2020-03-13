@@ -83,7 +83,7 @@ class Validator:
         # 想到了：黑牌不可以随意出。如果玩家还有需要多模的牌，他要么出"+2"要么出"+4"。
         if self.game.current_count_of_cards_need_to_draw > 1:
             # 如果玩家正在被“+2”或“+4”，他的出牌只能局限于加牌，他不能出任何其他的牌。
-            if card.type != CardType.drawTwo or card.type != CardType.drawFour:
+            if card.type != CardType.drawTwo and card.type != CardType.drawFour:
                 raise PlayerPutNormalCardWhenUnderAdmonish
         # 如果玩家的此次出牌是他的最后一张牌，那么这张牌不能为功能牌。
         if len(self.player.cards) == 1 and card.type != CardType.basic:
