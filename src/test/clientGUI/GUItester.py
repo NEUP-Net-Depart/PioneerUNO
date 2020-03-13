@@ -1,6 +1,7 @@
 from src.game.game import Game, Player  #
 from src.game.card import Card, CardColor  #
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
 import types
 
 
@@ -37,6 +38,7 @@ def choose_color_widget(card):
         def changer():
             card.color = to_color
             dialog.close()
+
         return changer
 
     for one_color in four_color:
@@ -82,8 +84,8 @@ def render_player_block(game, player_info_block_layout, right_meta_layout):
     all_players_metas_block_layout = QVBoxLayout()
     for player in game.player_list:
         player_meta_bar_layout = QHBoxLayout()
+        player_meta_bar_layout.setAlignment(Qt.AlignLeft)
         player_seat_label = QLabel(str(player.seat))
-        player_seat_label.setStyleSheet("width: 10px")
         if game.current_player_seat == player.seat:
             player_seat_label.setStyleSheet("border: 1px solid red;")
         player_card_button_list = []
@@ -98,6 +100,10 @@ def render_player_block(game, player_info_block_layout, right_meta_layout):
         all_players_metas_block_layout.addWidget(player_meta_bar)
     players_meta_block_widget = QWidget()
     players_meta_block_widget.setLayout(all_players_metas_block_layout)
+    players_meta_block_widget.setStyleSheet('''
+    QPushButton { max-width: 50px; float: left }
+    QLabel {max-width: 10px}
+    ''')
     return players_meta_block_widget
 
 

@@ -85,6 +85,8 @@ class Validator:
             # 如果玩家正在被“+2”或“+4”，他的出牌只能局限于加牌，他不能出任何其他的牌。
             if card.type != CardType.drawTwo and card.type != CardType.drawFour:
                 raise PlayerPutNormalCardWhenUnderAdmonish
+            if current_card.type == CardType.drawFour and card.type == CardType.drawTwo:
+                raise PlayerPutNormalCardWhenUnderAdmonish
         # 如果玩家的此次出牌是他的最后一张牌，那么这张牌不能为功能牌。
         if len(self.player.cards) == 1 and card.type != CardType.basic:
             raise PlayerLastCardIsFunctionalCardError
@@ -103,6 +105,9 @@ class Validator:
                 return
             else:
                 raise PlayerPutCardNotCorrectWithLastCardError
+        # 如果我出基本牌，但是当前牌不是基本牌……而且咱们的颜色还不一样
+        else:
+            raise PlayerPutCardNotCorrectWithLastCardError
 
     # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
     def canDraw(self):  # type: () -> None
