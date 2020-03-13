@@ -6,7 +6,7 @@ from src.lobby.Message import *
 
 def catch_put_exceptions(function):
     @wraps(function)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         try:
             return await function(args, kwargs)
         except FirstCardIsFunctionalCardError:

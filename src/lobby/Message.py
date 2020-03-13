@@ -1,7 +1,8 @@
 class Message:
-    def __init__(self, status: int, data=None):
+    def __init__(self, status: int, request_id=None, data=None, ):
         self.status = status
         self.data = data
+        self.request_id = request_id
 
     def __call__(self, *args, **kwargs):
         if len(args) > 0:
@@ -11,12 +12,15 @@ class Message:
     def json(self):
         return {
             'status': self.status,
-            'data': self.data
+            'data': self.data,
+            'request_id': self.request_id
         }
 
 
-def respond_json(status: int, data=None):
-    return Message(status, data).json()
+def respond_json(status: int, data=None, request_id=None):
+    return Message(status, request_id, {
+        'msg': data,
+    }).json()
 
 
 def respond_success(data=None):

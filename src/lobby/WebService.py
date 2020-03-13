@@ -27,7 +27,9 @@ async def get_rooms(request):
 async def handle_create_room(player, data):
     new_room = add_room(data.get('max_player', 2), data.get('initial_card_amount', 10))
     await new_room.add_player(player)
-    return respond_success(new_room.id)
+    return respond_success({
+        'id': new_room.id
+    })
 
 
 async def handle_ping(player, data):
@@ -72,7 +74,11 @@ async def handle_put_card(player, data):
 
 
 async def handle_skip_turn(player, data):
-    await player.skip_turn()
+    try:
+        await player.skip_turn()
+    except PlayerPassWithoutAction:
+        return
+
     return respond_success()
 
 
@@ -131,10 +137,12 @@ async def websocket_handler(request):
             data = msg_json.get('data', None)
             try:
                 result = await command_handler[msg_json['command']](player, data)
+                result['request_id'] = msg_json.get('request_id', None)
                 await ws.send_json(result)
-            except:
+            except Exception as e:
+                print(e)
                 await ws.send_json(unknown_command)
-                raise
+
         elif msg.type == aiohttp.WSMsgType.ERROR:
             print(ws.exception())
             break
