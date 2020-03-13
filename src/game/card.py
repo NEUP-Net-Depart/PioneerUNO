@@ -12,6 +12,11 @@ class CardColor(IntEnum):
     black = 5
     unset = 0
 
+    def toStr(self):
+        color_interpreter = {CardColor.red: '红', CardColor.black: '', CardColor.blue: '蓝', CardColor.green: '绿',
+                             CardColor.yellow: '黄'}
+        return color_interpreter[self]
+
 
 class CardType(IntEnum):
     basic = 0
@@ -38,7 +43,8 @@ class Card():
         return str((self.index, self.color, self.type, self.value))
 
     def __str__(self):
-        color_interpreter = {CardColor.red: '红', CardColor.black: '', CardColor.blue: '蓝', CardColor.green: '绿', CardColor.yellow: '黄'}
+        color_interpreter = {CardColor.red: '红', CardColor.black: '', CardColor.blue: '蓝', CardColor.green: '绿',
+                             CardColor.yellow: '黄'}
         type_interpreter = {CardType.basic: '', CardType.ban: '禁', CardType.turn: '转', CardType.drawTwo: '+2',
                             CardType.changeColor: '换色', CardType.drawFour: '+4'}
         value_str = '' if self.type != CardType.basic else str(self.value)

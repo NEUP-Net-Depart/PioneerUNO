@@ -17,6 +17,24 @@ class Validator:
         if card.index not in [player_card.index for player_card in self.player.cards]:
             raise PlayerNoSuchCardError
 
+    # 玩家是否为index为上家的玩家？就是说，玩家是否为刚刚被禁的玩家或者刚刚出完牌的玩家？
+    def _player_is_upper(self):
+        player_count = len(self.game.player_list)
+        if self.game.current_take_turns_positive:
+            # 这一长串是用来判断……的。
+            if self.player.seat + 1 == self.game.current_player_seat or (
+                    self.player.seat == player_count and self.game.current_player_seat == 1):
+                return True
+            else:
+                return False
+        else:
+            # 这一长串是用来判断……的。
+            if self.player.seat - 1 == self.game.current_player_seat or (
+                    self.player.seat == 1 and self.game.current_player_seat == player_count):
+                return True
+            else:
+                return False
+
     # 玩家是否为下一个应该出牌的人？
     def _player_must_next(self):
         if self.game.current_player_seat != self.player.seat:
@@ -39,7 +57,13 @@ class Validator:
             raise PlayerPutBlackCardError
         # 卡片必须完全一致才能切牌。
         elif card.color == self.game.current_card.color and card.type == self.game.current_card.type and card.value == self.game.current_card.value:
-            return
+            # 玩家不能切自己的牌
+            if self._player_is_upper():
+                if card.type == CardType.ban:
+                    raise BannedPlayerCutBanCardError
+                raise PlayerCutItsOwnCardError
+            else:
+                return
         else:
             raise PlayerCutCardsNotEqualToCurrentError
 
@@ -59,7 +83,9 @@ class Validator:
         # 想到了：黑牌不可以随意出。如果玩家还有需要多模的牌，他要么出"+2"要么出"+4"。
         if self.game.current_count_of_cards_need_to_draw > 1:
             # 如果玩家正在被“+2”或“+4”，他的出牌只能局限于加牌，他不能出任何其他的牌。
-            if card.type != CardType.drawTwo or card.type != CardType.drawFour:
+            if card.type != CardType.drawTwo and card.type != CardType.drawFour:
+                raise PlayerPutNormalCardWhenUnderAdmonish
+            if current_card.type == CardType.drawFour and card.type == CardType.drawTwo:
                 raise PlayerPutNormalCardWhenUnderAdmonish
         # 如果玩家的此次出牌是他的最后一张牌，那么这张牌不能为功能牌。
         if len(self.player.cards) == 1 and card.type != CardType.basic:
@@ -79,6 +105,9 @@ class Validator:
                 return
             else:
                 raise PlayerPutCardNotCorrectWithLastCardError
+        # 如果我出基本牌，但是当前牌不是基本牌……而且咱们的颜色还不一样
+        else:
+            raise PlayerPutCardNotCorrectWithLastCardError
 
     # 玩家是否可以摸牌？似乎没啥限制，想摸就摸吧，只要轮到你了就可以。
     def canDraw(self):  # type: () -> None
@@ -95,5 +124,6 @@ class Validator:
             raise DoubtTargetPlayerNotInPlayerListError
 
     def canGo(self):
+        self._player_must_next()
         if not self.player.drew_card:
             raise PlayerPassWithoutAction
