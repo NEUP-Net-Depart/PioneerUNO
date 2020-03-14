@@ -1,6 +1,7 @@
 import uuid
 
 from src.game.card import Card
+from src.lobby.Message import player_chat_event
 
 
 class Player:
@@ -38,3 +39,9 @@ class Player:
 
     async def uno(self):
         self.room.on_uno(self)
+
+    async def chat(self, message):
+        self.room.broadcast(player_chat_event({
+            'message': message,
+            'speaker': self.get_name()
+        }))

@@ -51,10 +51,14 @@ async def handle_join_room(player, data):
         await room.add_player(player)
     except:
         return room_is_full
-    return respond_success([
-        player.get_name()
-        for player in room.players.values()
-    ])
+    return respond_success(
+        {
+            "players": [
+                player.get_name()
+                for player in room.players.values()
+            ]
+        }
+    )
 
 
 async def handle_leave_room(player, data):
@@ -105,6 +109,11 @@ async def handle_get_rooms(*args, **kwargs):
         })
 
 
+async def handle_chat(player, data):
+    message = data.get("message", "")
+    await player.chat(message)
+    return respond_success()
+
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
@@ -115,7 +124,8 @@ command_handler = {
     "skip_turn": handle_skip_turn,
     "cut_card": handle_cut_card,
     "uno": handle_uno,
-    "rooms": handle_get_rooms
+    "rooms": handle_get_rooms,
+    "char": handle_chat
 }
 
 
@@ -137,7 +147,7 @@ async def websocket_handler(request):
             data = msg_json.get('data', None)
             try:
                 result = await command_handler[msg_json['command']](player, data)
-                result['request_id'] = msg_json.get('request_id', None)
+                result['requestId'] = msg_json.get('requestId', None)
                 await ws.send_json(result)
             except Exception as e:
                 print(e)
