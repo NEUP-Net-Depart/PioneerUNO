@@ -26,6 +26,7 @@ def respond_success(data=None):
     return respond_json(0, data)
 
 
+server_ping_event = Message(104)
 game_interrupted_event = Message(103)
 game_finished_event = Message(102)
 start_countdown_event = Message(101)

@@ -1,4 +1,6 @@
+import asyncio
 import json
+from time import time
 
 import aiohttp
 from aiohttp import web
@@ -33,6 +35,7 @@ async def handle_create_room(player, data):
 
 
 async def handle_ping(player, data):
+    player.last_time_active = time()
     return respond_success({
         'data': 'pong'
     })
@@ -114,6 +117,34 @@ async def handle_chat(player, data):
     await player.chat(message)
     return respond_success()
 
+
+async def monitor_connection(player):
+    while True:
+        if time() - player.last_time_active >= 10:
+            break
+        await asyncio.sleep(10)
+    print("time out")
+
+
+async def receive_message(player):
+    while True:
+        msg = await player.conn.receive()
+        if msg.type == aiohttp.WSMsgType.TEXT:
+            msg_json = json.loads(msg.data)
+            data = msg_json.get('data', None)
+            try:
+                result = await command_handler[msg_json['command']](player, data)
+                result['requestId'] = msg_json.get('requestId', None)
+                await player.conn.send_json(result)
+            except Exception as e:
+                print(e)
+                await player.conn.send_json(unknown_command)
+
+        elif msg.type == aiohttp.WSMsgType.ERROR:
+            print(player.conn.exception())
+            break
+
+
 command_handler = {
     "create_room": handle_create_room,
     "join_room": handle_join_room,
@@ -125,7 +156,7 @@ command_handler = {
     "cut_card": handle_cut_card,
     "uno": handle_uno,
     "rooms": handle_get_rooms,
-    "char": handle_chat
+    "char": handle_chat,
 }
 
 
@@ -141,23 +172,12 @@ async def websocket_handler(request):
     print("get connection" + nickname)
     player = Player(nickname, ws)
 
-    async for msg in ws:
-        if msg.type == aiohttp.WSMsgType.TEXT:
-            msg_json = json.loads(msg.data)
-            data = msg_json.get('data', None)
-            try:
-                result = await command_handler[msg_json['command']](player, data)
-                result['requestId'] = msg_json.get('requestId', None)
-                await ws.send_json(result)
-            except Exception as e:
-                print(e)
-                await ws.send_json(unknown_command)
+    monitor = asyncio.create_task(monitor_connection(player))
+    receiving = asyncio.create_task(receive_message(player))
 
-        elif msg.type == aiohttp.WSMsgType.ERROR:
-            print(ws.exception())
-            break
-
-    await player.leave_room()
+    done, pending = await asyncio.wait((monitor, receiving), return_when=asyncio.FIRST_COMPLETED)
+    print(done, pending)
+    await asyncio.gather(player.leave_room())
     print("disconnected")
 
 

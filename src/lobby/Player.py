@@ -1,4 +1,5 @@
 import uuid
+from time import time
 
 from src.game.card import Card
 from src.lobby.Message import player_chat_event
@@ -11,6 +12,7 @@ class Player:
         self.nickname = nickname
         self.room = None
         self.isPrepared = False
+        self.last_time_active = time()
 
     def get_name(self):
         return f'{self.nickname}@{self.id[:4]}'
