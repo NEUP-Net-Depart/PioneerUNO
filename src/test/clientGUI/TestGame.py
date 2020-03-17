@@ -4,7 +4,7 @@ from operator import attrgetter
 from src.test.clientGUI.GUItester import render_player_block, render_right_area
 from PyQt5.QtWidgets import *
 
-main_game = Game(5, 7)
+main_game = Game(3,4)
 main_game.player_list.sort(key=attrgetter('seat'))
 
 app = QApplication([])
@@ -23,4 +23,5 @@ main_layout.addWidget(right_info_widget)
 main_layout_widget = QWidget()
 main_layout_widget.setLayout(main_layout)
 main_layout_widget.show()
+main_layout_widget.setStyleSheet("font-size: 20px")
 app.exec()

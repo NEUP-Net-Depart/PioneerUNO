@@ -51,7 +51,7 @@ def choose_color_widget(card):
 
 def generate_put_function(player, card, player_info_block_layout, right_meta_layout):
     def putCard():
-        if player.game.current_player_seat == player.seat:
+        if player.game.current_player == player:
             if card.color == CardColor.black:
                 choose_color_widget(card).exec()
             player.Put(card)
@@ -64,7 +64,7 @@ def generate_put_function(player, card, player_info_block_layout, right_meta_lay
 
 def generate_draw_function(game, player_info_block_layout, right_meta_layout):
     def drawCard():
-        player = game.current_player()
+        player = game.current_player
         player.Draw()
         _update_player_block(game, player_info_block_layout, right_meta_layout)
 
@@ -73,7 +73,7 @@ def generate_draw_function(game, player_info_block_layout, right_meta_layout):
 
 def generate_go_function(game, player_info_block_layout, right_meta_layout):
     def go():
-        player = game.current_player()
+        player = game.current_player
         player.Go()
         _update_player_block(game, player_info_block_layout, right_meta_layout)
 
@@ -86,11 +86,15 @@ def render_player_block(game, player_info_block_layout, right_meta_layout):
         player_meta_bar_layout = QHBoxLayout()
         player_meta_bar_layout.setAlignment(Qt.AlignLeft)
         player_seat_label = QLabel(str(player.seat))
-        if game.current_player_seat == player.seat:
+        if game.current_player.seat == player.seat:
             player_seat_label.setStyleSheet("border: 1px solid red;")
+        else:
+            player_seat_label.setStyleSheet("border: 1px solid white;")
         player_card_button_list = []
         for card in player.cards:
             card_btn = QPushButton(str(card))
+            if str(card) == str(game.current_card):
+                card_btn.setStyleSheet("color: red")
             card_btn.clicked.connect(generate_put_function(player, card, player_info_block_layout, right_meta_layout))
             player_card_button_list.append(card_btn)
         for widget in [player_seat_label] + player_card_button_list:
@@ -101,8 +105,8 @@ def render_player_block(game, player_info_block_layout, right_meta_layout):
     players_meta_block_widget = QWidget()
     players_meta_block_widget.setLayout(all_players_metas_block_layout)
     players_meta_block_widget.setStyleSheet('''
-    QPushButton { max-width: 50px; float: left }
-    QLabel {max-width: 10px}
+    QPushButton { max-width: 70px; float: left }
+    QLabel {max-width: 30px}
     ''')
     return players_meta_block_widget
 

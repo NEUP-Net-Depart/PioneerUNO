@@ -19,25 +19,19 @@ class Validator:
 
     # 玩家是否为index为上家的玩家？就是说，玩家是否为刚刚被禁的玩家或者刚刚出完牌的玩家？
     def _player_is_upper(self):
-        player_count = len(self.game.player_list)
-        if self.game.current_take_turns_positive:
-            # 这一长串是用来判断……的。
-            if self.player.seat + 1 == self.game.current_player_seat or (
-                    self.player.seat == player_count and self.game.current_player_seat == 1):
-                return True
-            else:
-                return False
-        else:
-            # 这一长串是用来判断……的。
-            if self.player.seat - 1 == self.game.current_player_seat or (
-                    self.player.seat == 1 and self.game.current_player_seat == player_count):
-                return True
-            else:
-                return False
+        return self.player == self.game.previous_player
+
+        # current_player_index = self.game.player_list.index(self.game.current_player)
+        # operation_player_index = self.game.player_list.index(self.player)
+        # minus_value = current_player_index - operation_player_index
+        # if self.game.current_take_turns_positive:
+        #     return minus_value == 1 or minus_value + len(self.game.player_list) == 1
+        # else:
+        #     return minus_value == -1 or minus_value - len(self.game.player_list) == -1
 
     # 玩家是否为下一个应该出牌的人？
     def _player_must_next(self):
-        if self.game.current_player_seat != self.player.seat:
+        if self.game.current_player != self.player:
             raise PlayerPutCardsNotAtHisTurnError
 
     @staticmethod
@@ -57,7 +51,7 @@ class Validator:
             raise PlayerPutBlackCardError
         # 卡片必须完全一致才能切牌。
         elif card.color == self.game.current_card.color and card.type == self.game.current_card.type and card.value == self.game.current_card.value:
-            # 玩家不能切自己的牌
+            # 玩家不能切自己的牌 TODO: 这里可能存在逻辑问题！
             if self._player_is_upper():
                 if card.type == CardType.ban:
                     raise BannedPlayerCutBanCardError

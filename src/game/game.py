@@ -8,7 +8,8 @@ class Game:
     player_list = []  # type: List[Player]
     card_pool = []  # type: List[Card] # 自动洗牌。
     shuffle_times = 0  # 洗过几次牌？在一开始应该算一次，这个值用来生成牌index。
-    current_player_seat = 0  # 现在应该进行操作的玩家seat，也是从1开始
+    current_player = None  # type: Player
+    previous_player = None  # type: Player # 上一个出牌的玩家。在校验“玩家不能切自己”时会有用。
     current_take_turns_positive = True  # type: bool# 游戏正向进行，下一个出牌的玩家编号应该为(当前编号+1或2)%人数。
     current_count_of_cards_need_to_draw = 0  # 加牌叠加的数量
     current_card = None  # type: Card # 当前状态位于牌堆顶的卡片
@@ -36,19 +37,18 @@ class Game:
         self._shuffle()
         for player in self.player_list:
             player.cards = self._pop_cards(draw_cards)  # 发牌
-        self.current_player_seat = 1
+        self.current_player = self.player_list[0]
         self.current_take_turns_positive = True
         self.current_count_of_cards_need_to_draw = 1
 
     def _next_player(self, value=1):  # type: (int) -> None
+        self.previous_player = self.current_player
         if self.current_take_turns_positive:
-            self.current_player_seat += value
-            if self.current_player_seat > len(self.player_list):
-                self.current_player_seat -= len(self.player_list)
+            self.current_player = self.player_list[
+                (self.player_list.index(self.current_player) + value) % len(self.player_list)]
         else:
-            self.current_player_seat -= value
-            if self.current_player_seat < 1:
-                self.current_player_seat += len(self.player_list)
+            self.current_player = self.player_list[
+                (self.player_list.index(self.current_player) - value) % len(self.player_list)]
 
     def _shuffle(self):
         self.card_pool = Card.GenerateAllCards(108 * self.shuffle_times + 1)
@@ -85,7 +85,7 @@ class Game:
     # cut是玩家切牌。玩家切牌后，游戏就从玩家处继续进行。
     def cut(self, player, card):  # type: (Player, Card) -> None
         # 玩家切牌的逻辑也很简单，只需要把“出牌”的发生地改成切牌玩家的seat然后再出牌就可以。
-        self.current_player_seat = player.seat
+        self.current_player = player
         self.put(card)
         return
 
@@ -93,11 +93,6 @@ class Game:
         # 有人赢了？？？把他从玩家列表里丢出去（
         # TODO: 这个做法十分不负责任（
         self.player_list.pop(winner.seat - 1)
-
-    def current_player(self):
-        for player in self.player_list:
-            if player.seat == self.current_player_seat:
-                return player
 
     def punishUno(self, target_player):  # type: (Player) -> None
         # 玩家没有uno！
