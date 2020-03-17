@@ -19,15 +19,17 @@ class Validator:
 
     # 玩家是否为index为上家的玩家？就是说，玩家是否为刚刚被禁的玩家或者刚刚出完牌的玩家？
     def _player_is_upper(self):
-        return self.player == self.game.previous_player
-
-        # current_player_index = self.game.player_list.index(self.game.current_player)
-        # operation_player_index = self.game.player_list.index(self.player)
-        # minus_value = current_player_index - operation_player_index
-        # if self.game.current_take_turns_positive:
-        #     return minus_value == 1 or minus_value + len(self.game.player_list) == 1
+        # if self.player == self.game.previous_player:
+        #     return True
         # else:
-        #     return minus_value == -1 or minus_value - len(self.game.player_list) == -1
+        #     if self.game.current_take_turns_positive:
+        current_player_index = self.game.player_list.index(self.game.current_player)
+        operation_player_index = self.game.player_list.index(self.player)
+        minus_value = current_player_index - operation_player_index
+        if self.game.current_take_turns_positive:
+            return minus_value == 1 or minus_value + len(self.game.player_list) == 1
+        else:
+            return minus_value == -1 or minus_value - len(self.game.player_list) == -1
 
     # 玩家是否为下一个应该出牌的人？
     def _player_must_next(self):
@@ -51,7 +53,7 @@ class Validator:
             raise PlayerPutBlackCardError
         # 卡片必须完全一致才能切牌。
         elif card.color == self.game.current_card.color and card.type == self.game.current_card.type and card.value == self.game.current_card.value:
-            # 玩家不能切自己的牌 TODO: 这里可能存在逻辑问题！
+            # 玩家不能切自己的牌
             if self._player_is_upper():
                 if card.type == CardType.ban:
                     raise BannedPlayerCutBanCardError

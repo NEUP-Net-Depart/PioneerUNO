@@ -4,7 +4,7 @@ from operator import attrgetter
 from src.test.clientGUI.GUItester import render_player_block, render_right_area
 from PyQt5.QtWidgets import *
 
-main_game = Game(3,4)
+main_game = Game(7,7)
 main_game.player_list.sort(key=attrgetter('seat'))
 
 app = QApplication([])
